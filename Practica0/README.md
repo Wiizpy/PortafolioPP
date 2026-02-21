@@ -403,3 +403,11 @@ git push
 y ya con eso tendrias la pagina estatica dentro de actions de github
 
 ya cada que hagas un guardar cambios en accion se grabarian los procesos que hiciste
+
+Enlace de mi repositorio
+
+https://github.com/Wiizpy/PortafolioPP
+
+Enlace de mi pagina estatica
+
+https://wiizpy.github.io/PortafolioPP/
