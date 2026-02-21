@@ -1,6 +1,6 @@
 +++
 date = '2026-02-13T18:14:27-08:00'
-draft = true
+draft = false
 title = 'Practica0: Manejo de repositorios'
 +++
 
