@@ -4,8 +4,6 @@ draft = false
 title = 'Practica0: Manejo de repositorios'
 +++
 
-# MANEJO DE REPOSITORIOS
-
 ## Subsecciones
 
 En esta práctica se abordaron tres temas principales:
