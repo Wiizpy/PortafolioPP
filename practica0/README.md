@@ -47,13 +47,17 @@ Este es un texto ~~tachado~~
    2. Elemento 3.2
 4. Elemento 4
 
-![Texto alternativo](image.png)
+[google.com](https:/www.google.com) "Enlace a google"
+
+
+![SUS](https://static.wikia.nocookie.net/memes-pedia/images/2/25/Amogus1.png/revision/latest?cb=20210412220457&path-prefix=es)
 
 
 
 <!-- Tablas -->
 | Productos | Precio | Cantidad |
-| - | - | - |
+|-----------|--------|----------|
+| papa      | 18     | 1        |
 
 <!-- Notas -->
 > Esto es una nota
@@ -73,5 +77,17 @@ Este es un texto ~~tachado~~
 
 ___
 
-<!-- Menciones -->\
+`console.log('hello world')`
+
+```c
+
+int numero;
+
+printf("Dame un numero");
+scanf("%d", &numero);
+printf("El numero es %d", numero);
+
+```
+
+<!-- Menciones -->
 @darhroockie :+1: :smile:
