@@ -650,3 +650,179 @@ job.estado = COMPLETADO;
 
 ## Ejecucion 3
 
+![alt text](image-9.png)
+
+![alt text](image-10.png)
+
+![alt text](image-11.png)
+
+![alt text](image-12.png)
+
+![alt text](image-13.png)
+
+## Preguntas
+
+1. ¿Dónde guardaste el contador de id y por qué? 
+
+El contador de `id` lo guardé en la función principal `main`, en la variable `siguiente_id`. Lo hice ahí porque desde el menú principal se van registrando los nuevos trabajos y cada vez que se agrega uno nuevo ese contador aumenta en 1.
+
+De esta forma cada trabajo recibe un identificador único y es más fácil controlarlo después, por ejemplo al momento de cancelarlo por `id`. También me pareció una buena opción porque el `main` es quien controla todo el flujo del programa y desde ahí se administran las operaciones principales de la cola.
+
+2. En tu versión dinámica: ¿qué función es responsable de liberar memoria? ¿cómo lo verificas?
+
+La función principal encargada de liberar toda la memoria al final del programa es `qd_destroy`. Esta función recorre toda la lista enlazada nodo por nodo y libera cada uno usando `free`.
+
+Además, durante la ejecución normal también se libera memoria en `qd_dequeue`, porque cuando se remueve el trabajo del frente de la cola, el nodo correspondiente se elimina y su memoria también se libera con `free`.
+
+Lo verifiqué revisando que:
+- cada nodo creado con `malloc` en `qd_enqueue` tenga su liberación correspondiente
+- `qd_dequeue` use `free` al sacar un elemento
+- `qd_destroy` recorra toda la cola y libere los nodos restantes antes de salir
+
+Con eso se evita que queden nodos reservados en memoria al terminar el programa
+
+3. ¿Qué invariantes mantiene tu cola? (por ejemplo: rangos y significado de front/rear/size)
+
+En mi versión dinámica la cola mantiene varias invariantes importantes:
+
+- `head` siempre apunta al primer nodo de la cola
+- `tail` siempre apunta al último nodo de la cola
+- si la cola está vacía, entonces `head == NULL` y `tail == NULL`
+- si la cola tiene al menos un elemento, entonces `head != NULL`
+- el campo `size` representa la cantidad real de nodos almacenados en la cola
+- después de un `enqueue`, el nuevo trabajo queda al final, excepto si es urgente, en cuyo caso se inserta al frente por la mejora de prioridad
+- después de un `dequeue`, el frente avanza al siguiente nodo
+- si al eliminar un nodo la cola queda vacía, entonces `tail` también se vuelve `NULL`
+
+Estas condiciones ayudan a que la estructura de la cola se mantenga consistente durante toda la ejecución del programa
+
+4. ¿Por qué peek no debe modificar la cola?
+
+La función `peek` no debe modificar la cola porque su propósito es solamente consultar cuál es el siguiente trabajo que se va a atender. Si `peek` cambiara la cola, entonces dejaría de ser una operación de consulta y se comportaría como un `dequeue`.
+
+La ventaja de `peek` es que permite ver el trabajo que está al frente sin eliminarlo, lo cual es útil para revisar el siguiente elemento pendiente sin alterar el orden de la cola ni perder información.
+
+5. Si el programa falla al agregar trabajos, ¿cómo distingues entre “cola llena” y “entrada in-
+válida”?
+
+En la versión estática, la situación de “cola llena” se distingue revisando si la cantidad de elementos llegó al límite máximo definido por `MAX_JOBS`. En ese caso el problema no es la entrada del usuario, sino que la estructura ya no tiene espacio para guardar más trabajos.
+
+En cambio, una “entrada inválida” ocurre cuando el usuario introduce datos incorrectos, por ejemplo un número negativo en páginas o copias, o un valor fuera de lo esperado en la prioridad. En ese caso el problema no está en la cola, sino en los datos capturados.
+
+En la versión dinámica ya no existe el problema de “cola llena” como en la estática, porque la memoria se reserva con `malloc` conforme se necesitan nuevos nodos. Ahí el fallo al agregar un trabajo se puede deber a dos cosas:
+
+- que la entrada capturada sea incorrecta
+- que `malloc` falle y no pueda reservar memoria
+
+Por eso en la versión dinámica se valida por separado la lectura de datos y también se revisa si `malloc` regresa `NULL`.
+
+## Snippets
+
+### Alcance y duración de variables
+
+En el siguiente fragmento se observa una variable local utilizada dentro de la función principal. La variable `siguiente_id` fue usada para llevar el control de los identificadores de cada trabajo de impresión.
+
+```c
+int main(void)
+{
+    QueueDynamic_t cola;
+    Estadisticas_t stats;
+    PrintJob_t job;
+    PrintJob_t cancelado;
+    int opcion;
+    int siguiente_id;
+    int id_cancelar;
+
+    qd_init(&cola);
+
+    stats.trabajos_completados = 0;
+    stats.trabajos_cancelados = 0;
+    stats.paginas_impresas = 0;
+
+    siguiente_id = 1;
+```
+
+### Reserva de memoria
+```c
+int qd_enqueue(QueueDynamic_t *q, PrintJob_t job)
+{
+    Node_t *new_node;
+
+    new_node = (Node_t *)malloc(sizeof(Node_t));
+    if (new_node == NULL)
+    {
+        return 0;
+    }
+```
+
+Este fragmento demuestra dónde se reserva memoria en el heap para crear un nuevo nodo de la lista enlazada.
+
+### Liberación de memoria
+```c
+int qd_dequeue(QueueDynamic_t *q, PrintJob_t *out)
+{
+    Node_t *temp;
+
+    if (q->head == NULL)
+    {
+        return 0;
+    }
+
+    temp = q->head;
+    *out = temp->job;
+
+    q->head = temp->next;
+
+    if (q->head == NULL)
+    {
+        q->tail = NULL;
+    }
+
+    free(temp);
+    q->size--;
+
+    return 1;
+}
+```
+
+En este caso la memoria se libera con free(temp) cuando un nodo sale del frente de la cola. Además, al final del programa también se libera toda la memoria restante usando la función qd_destroy.
+```c
+void qd_destroy(QueueDynamic_t *q)
+{
+    Node_t *current;
+    Node_t *temp;
+
+    current = q->head;
+
+    while (current != NULL)
+    {
+        temp = current;
+        current = current->next;
+        free(temp);
+    }
+
+    q->head = NULL;
+    q->tail = NULL;
+    q->size = 0;
+}
+```
+Con esto se evita que queden nodos sin liberar al finalizar el programa.
+
+# Conclusión
+
+En esta práctica pude entender mejor cómo funciona una cola y por qué es útil para resolver un problema real como el manejo de trabajos de impresión. Primero trabajé con una versión estática usando arreglos, lo cual me ayudó a comprender la lógica básica de una estructura FIFO y cómo se agregan, consultan y eliminan elementos en orden.
+
+Después, al migrar la implementación a memoria dinámica, entendí mejor cómo se usan las listas enlazadas y por qué son más flexibles que un arreglo fijo. También aprendí la importancia de reservar memoria con `malloc` y liberarla correctamente con `free`, ya que si no se hace se pueden producir fugas de memoria.
+
+En la última parte, la simulación permitió que el programa se pareciera más a un caso real, porque ya no solo almacenaba trabajos, sino que también mostraba el proceso de impresión página por página. Además, las mejoras implementadas como prioridad, cancelación y estadísticas hicieron que el sistema fuera más completo y funcional.
+
+Esta práctica me ayudó a reforzar temas importantes del lenguaje C como structs, enums, punteros, memoria dinámica, funciones y validación lógica del flujo del programa. También me permitió comparar de forma más clara las ventajas y desventajas entre una cola estática y una dinámica.
+
+## Referencias
+
+G2d, P. [@programaciong2d]. (s/f). Areas de memoria en C, Estatica, Stack y Heap [[Object Object]]. Youtube. Recuperado el 14 de marzo de 2026, de https://www.youtube.com/watch?v=FBEh5XV9QQc
+
+Programación en C con Memoria Dinámica. (s/f). Google.com. Recuperado el 14 de marzo de 2026, de https://sites.google.com/site/programacioniiuno/temario/unidad-1---manejo-de-memoria-dinmica/programacin-en-c-con-memoria-dinmica
+
+(S/f). Sciencedirect.com. Recuperado el 14 de marzo de 2026, de https://www.sciencedirect.com/topics/computer-science/static-memory
+
