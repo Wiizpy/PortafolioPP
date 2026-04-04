@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Registrar entrada</h2>
+
+{% if message %}
+    <p class="success">{{ message }}</p>
+{% endif %}
+
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% endif %}
+
+<form method="POST">
+    <label for="plate">Placas:</label>
+    <input type="text" name="plate" id="plate" required>
+
+    <label for="vehicle_type">Tipo de vehículo:</label>
+    <select name="vehicle_type" id="vehicle_type" required>
+        <option value="Car">Car</option>
+        <option value="Motorcycle">Motorcycle</option>
+    </select>
+
+    <button type="submit">Registrar entrada</button>
+</form>
+{% endblock %}
