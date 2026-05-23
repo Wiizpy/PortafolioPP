@@ -5,6 +5,10 @@ title = 'Practica4: El paradigma logico'
 +++
 
 # Práctica IV - El paradigma lógico
+### Equipo
+  Axel Ricardo Diaz Mendoza 379652
+
+  Jose Pablo Rivera Nava 379295 
 
 ---
 
@@ -328,12 +332,6 @@ El primer caso indica que si solo hay un disco, este se mueve directamente de la
 
 El segundo caso se utiliza cuando hay más de un disco. Primero se mueven `N-1` discos a la torre auxiliar, después se mueve el disco más grande a la torre destino y finalmente se mueven los discos restantes desde la torre auxiliar hacia la torre destino.
 
-## Ejemplo de consulta
-
-```prolog
-?- hanoi(3, izquierda, derecha, centro).
-```
-
 ## salida
 
 ![alt text](image.png)
@@ -441,7 +439,7 @@ La regla `puede_alcanzar` inicia la búsqueda de una solución desde un estado i
 puede_alcanzar(estado(puerta, suelo, ventana, no), Acciones).
 ```
 
-## Resultado
+## Resultado de ejecución
 
 ![Resultado del problema del mono y la banana](image-1.png)
 
