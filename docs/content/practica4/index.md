@@ -334,17 +334,9 @@ El segundo caso se utiliza cuando hay más de un disco. Primero se mueven `N-1` 
 ?- hanoi(3, izquierda, derecha, centro).
 ```
 
-## Posible salida
+## salida
 
-```text
-Mover disco de izquierda a derecha
-Mover disco de izquierda a centro
-Mover disco de derecha a centro
-Mover disco de izquierda a derecha
-Mover disco de centro a izquierda
-Mover disco de centro a derecha
-Mover disco de izquierda a derecha
-```
+![alt text](image.png)
 
 ## Resultado del problema
 
@@ -365,7 +357,7 @@ Este problema se utiliza para representar acciones y cambios de estado dentro de
 Se puede representar el estado del problema con la siguiente estructura:
 
 ```prolog
-estado_en(PosicionMono, AlturaMono, PosicionCaja, TieneBanana)
+estado(PosicionMono, AlturaMono, PosicionCaja, TieneBanana)
 ```
 
 Donde:
@@ -378,46 +370,80 @@ Donde:
 ## Código en Prolog
 
 ```prolog
-accion(camina(X,Y),
-    estado_en(X, suelo, Caja, Tiene),
-    estado_en(Y, suelo, Caja, Tiene)).
+lugar(puerta).
+lugar(ventana).
+lugar(centro).
 
-accion(mover_caja(X,Y),
-    estado_en(X, suelo, X, Tiene),
-    estado_en(Y, suelo, Y, Tiene)).
+mover(
+    estado(X, suelo, Caja, Tiene),
+    caminar(X, Y),
+    estado(Y, suelo, Caja, Tiene)
+) :-
+    lugar(X),
+    lugar(Y),
+    X \== Y.
 
-accion(subir,
-    estado_en(X, suelo, X, Tiene),
-    estado_en(X, arriba, X, Tiene)).
+mover(
+    estado(X, suelo, X, Tiene),
+    empujar_caja(X, Y),
+    estado(Y, suelo, Y, Tiene)
+) :-
+    lugar(X),
+    lugar(Y),
+    X \== Y.
 
-accion(tomar_banana,
-    estado_en(centro, arriba, centro, no),
-    estado_en(centro, arriba, centro, si)).
+mover(
+    estado(X, suelo, X, Tiene),
+    subir_caja,
+    estado(X, arriba, X, Tiene)
+).
+
+mover(
+    estado(centro, arriba, centro, no),
+    tomar_banana,
+    estado(centro, arriba, centro, si)
+).
+
+puede_alcanzar(EstadoInicial, Acciones) :-
+    buscar(EstadoInicial, [], Acciones).
+
+buscar(
+    estado(_, _, _, si),
+    _,
+    []
+).
+
+buscar(
+    EstadoActual,
+    Visitados,
+    [Accion | RestoAcciones]
+) :-
+    mover(EstadoActual, Accion, EstadoNuevo),
+    \+ member(EstadoNuevo, Visitados),
+    buscar(EstadoNuevo, [EstadoNuevo | Visitados], RestoAcciones).
 ```
 
 ## Explicación del código
 
-La acción `camina(X,Y)` representa que el mono puede caminar de una posición a otra mientras está en el suelo.
+La acción `caminar(X,Y)` representa que el mono puede caminar de una posición a otra mientras está en el suelo.
 
-La acción `mover_caja(X,Y)` indica que el mono puede mover la caja de una posición a otra, siempre que el mono y la caja estén en el mismo lugar.
+La acción `empujar_caja(X,Y)` indica que el mono puede mover la caja de una posición a otra, siempre que el mono y la caja estén en el mismo lugar.
 
-La acción `subir` representa que el mono puede subirse a la caja cuando ambos están en la misma posición.
+La acción `subir_caja` representa que el mono puede subirse a la caja cuando ambos están en la misma posición.
 
 La acción `tomar_banana` indica que el mono puede tomar la banana si se encuentra en el centro, está arriba de la caja y la caja también está en el centro.
 
-## Consulta de ejemplo
+La regla `puede_alcanzar` inicia la búsqueda de una solución desde un estado inicial. Para evitar que el programa se quede repitiendo los mismos movimientos, se utiliza una lista de estados visitados. De esta forma, Prolog busca una secuencia de acciones hasta llegar al estado donde el mono ya tiene la banana.
+
+## Consulta utilizada
 
 ```prolog
-?- accion(tomar_banana,
-estado_en(centro, arriba, centro, no),
-Resultado).
+puede_alcanzar(estado(puerta, suelo, ventana, no), Acciones).
 ```
 
-## Resultado esperado
+## Resultado
 
-```prolog
-Resultado = estado_en(centro, arriba, centro, si).
-```
+![Resultado del problema del mono y la banana](image-1.png)
 
 ## Resultado del problema
 
